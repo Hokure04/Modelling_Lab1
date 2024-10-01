@@ -38,9 +38,9 @@ def main():
 
     print("Результаты анализа выборки:")
     print(table)
-
     autocorr_values = autocorrelation(data)
     print("Значения автокорреляции:", autocorr_values)
+    plot_histogram(data)
 
 
 def excel_to_array(file_path):
@@ -84,22 +84,34 @@ def plot_data(data):
     plt.grid(True)
     plt.show()
 
-# сделал через chat-gpt считает неправильно, нужно будет переделать
-def autocorrelation(data, max_lag=10):
+def autocorrelation(data):
+    data_1 = data[1:].copy()
+    data_2 = data[:-1].copy()
+    autocorr_coefficients = []
 
-    n = len(data)
-    mean = calс_mean(data)
-    std_dev = calc_standard_deviation(calc_variance(data, mean))
+    for _ in range(10):
+        mean_1 = calс_mean(data_1)
+        mean_2 = calс_mean(data_2)
+        first = [(value - mean_1) for value in data_1]
+        third = [(value - mean_1)**2 for value in data_1]
+        second = [(value-mean_2) for value in data_2]
+        fourth = [(value-mean_2)**2 for value in data_2]
+        res = [f*s for f, s in zip(first, second)]
+        autocorr_coefficients.append(sum(res)/sqrt(sum(third)*sum(fourth)))
 
-    autocorr_values = []
+        data_1 = data_1[1:]
+        data_2 = data_2[:-1]
 
-    for lag in range(1, max_lag + 1):
-        covar_sum = sum((data[i] - mean) * (data[i + lag] - mean) for i in range(n - lag))
+    return autocorr_coefficients
 
-        autocorr = covar_sum / ((n - lag) * std_dev ** 2)
-        autocorr_values.append(autocorr)
-
-    return autocorr_values
+def plot_histogram(data, bins=10, title="Гистограмма распределения", xlabel="Значения", ylabel="Частота"):
+    plt.figure(figsize=(10, 6))
+    plt.hist(data, bins=bins, color='blue', edgecolor='black', alpha=0.7)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid(True)
+    plt.show()
 
 
 main()
