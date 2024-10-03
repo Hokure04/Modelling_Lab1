@@ -1,9 +1,9 @@
 from math import sqrt
 from prettytable import PrettyTable
-import scipy.stats as st
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import scipy.stats as st
+import numpy as np
 
 def main():
     file_path = 'data_lab1.xlsx'
@@ -42,6 +42,10 @@ def main():
     print("Значения автокорреляции:", autocorr_values)
     plot_histogram(data)
 
+    erlang_data = generate_erlang_data(k=2, scale=100, size=300)
+    print("Сгененрированные данные по рспрделению Эрланга:", erlang_data)
+    plot_histogram(erlang_data)
+
 
 def excel_to_array(file_path):
     df = pd.read_excel(file_path, header=None)
@@ -76,13 +80,14 @@ def calc_variation_coefficient(deviation, mean):
 
 
 def plot_data(data):
-    plt.figure(figsize=(15, 8))
+    plt.figure(figsize=(16, 10))
     plt.plot(data, marker='o', linestyle='-', color='blue')
     plt.title('График значений из файла Excel')
     plt.xlabel('Индекс')
     plt.ylabel('Значение')
     plt.grid(True)
     plt.show()
+
 
 def autocorrelation(data):
     data_1 = data[1:].copy()
@@ -93,16 +98,17 @@ def autocorrelation(data):
         mean_1 = calс_mean(data_1)
         mean_2 = calс_mean(data_2)
         first = [(value - mean_1) for value in data_1]
-        third = [(value - mean_1)**2 for value in data_1]
-        second = [(value-mean_2) for value in data_2]
-        fourth = [(value-mean_2)**2 for value in data_2]
-        res = [f*s for f, s in zip(first, second)]
-        autocorr_coefficients.append(sum(res)/sqrt(sum(third)*sum(fourth)))
+        third = [(value - mean_1) ** 2 for value in data_1]
+        second = [(value - mean_2) for value in data_2]
+        fourth = [(value - mean_2) ** 2 for value in data_2]
+        res = [f * s for f, s in zip(first, second)]
+        autocorr_coefficients.append(sum(res) / sqrt(sum(third) * sum(fourth)))
 
         data_1 = data_1[1:]
         data_2 = data_2[:-1]
 
     return autocorr_coefficients
+
 
 def plot_histogram(data, bins=10, title="Гистограмма распределения", xlabel="Значения", ylabel="Частота"):
     plt.figure(figsize=(10, 6))
@@ -112,6 +118,22 @@ def plot_histogram(data, bins=10, title="Гистограмма распреде
     plt.ylabel(ylabel)
     plt.grid(True)
     plt.show()
+
+
+def generate_erlang_data(k, scale, size):
+    # Генерируем данные по Эрланговскому распределению
+    data = st.erlang.rvs(a=k, scale=scale, size=size)
+
+    # Нормализация данных в диапазоне [0, 1200], при этом большинство будет в [0, 250]
+    min_value = 0
+    max_value = 1200
+    scaled_data = min_value + (max_value - min_value) * (data - np.min(data)) / (np.max(data) - np.min(data))
+
+    # Ограничение данных: оставляем большинство в диапазоне [0, 250] с пиком около 200
+    # Масштабирование для "смещения" данных так, чтобы они в основном находились до 250
+    scaled_data = scaled_data[scaled_data <= 1200]
+
+    return scaled_data
 
 
 main()
