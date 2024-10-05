@@ -5,11 +5,12 @@ import scipy.stats as st
 import numpy as np
 from graphics import draw_data, draw_histogram, draw_all_data, draw_two_histograms
 
+
 def main():
     file_path = 'data_lab1.xlsx'
     excel_data = excel_to_array(file_path)
     autocorrelation_table = PrettyTable()
-    autocorrelation_table.field_names = ["Сдвиг ЧП","1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    autocorrelation_table.field_names = ["Сдвиг ЧП", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 
     draw_data(excel_data, 'График значений из excel')
     calc_sequence_characteristics(excel_data)
@@ -29,6 +30,8 @@ def main():
     print(autocorrelation_table)
     draw_all_data(excel_data, erlang_data, "График значений обеих выборок")
     draw_two_histograms(excel_data, erlang_data, 15, 'Гистограммы распределения из excel и сгенерированная')
+    correlation = calc_correlation(excel_data, erlang_data)
+    print(f'Коэффициент корреляции выборок: {correlation}')
 
 
 
@@ -63,6 +66,7 @@ def calc_confidence_interval(mean, deviation, data, confidence_level):
 def calc_variation_coefficient(deviation, mean):
     return deviation / mean
 
+
 def autocorrelation(data):
     data_1 = data[1:].copy()
     data_2 = data[:-1].copy()
@@ -95,6 +99,7 @@ def generate_erlang_data(k, scale, size):
 
     return scaled_data
 
+
 def calc_sequence_characteristics(data):
     sample_sizes = [10, 20, 50, 100, 200, len(data)]
     table = PrettyTable()
@@ -123,5 +128,20 @@ def calc_sequence_characteristics(data):
 
     print("Результаты анализа выборки:")
     print(table)
+
+def calc_correlation(data1, data2):
+    mean1 = calc_mean(data1)
+    mean2 = calc_mean(data2)
+    covariance = sum((data1[i] - mean1) * (data2[i] - mean2) for i in range(len(data1))) / len(data1)
+
+    variance1 = calc_variance(data1, mean1)
+    variance2 = calc_variance(data2, mean2)
+    stddev1 = sqrt(variance1)
+    stddev2 = sqrt(variance2)
+
+    correlation = covariance / (stddev1 * stddev2)
+
+    return correlation
+
 
 main()
