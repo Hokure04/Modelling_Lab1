@@ -18,7 +18,7 @@ def main():
     print("Значения автокорреляции:", autocorr_values)
     draw_histogram(excel_data, 15, 'Гистограмма распределения данных из excel')
 
-    erlang_data = generate_erlang_data(k=3, scale=10, size=300)
+    erlang_data = generate_erlang_data(k=2, scale=1, size=300)
     print("Сгененрированные данные по рспрделению Эрланга:", erlang_data)
     draw_data(erlang_data, 'График сгенерированных значений')
     calc_sequence_characteristics(erlang_data)
